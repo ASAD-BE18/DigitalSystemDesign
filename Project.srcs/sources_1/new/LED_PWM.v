@@ -1,16 +1,28 @@
-module LED_PWM(clk, PWM_input1,PWM_input2,PWM_input3, LED);
+module LED_PWM(clk,R_btn,G_btn,B_btn, LED);
 input clk;
-input [3:0] PWM_input1;     // 16 intensity levels
-input [3:0] PWM_input2;     // 16 intensity levels
-input [3:0] PWM_input3;     // 16 intensity levels
 output [2:0] LED;
+wire sclk;
+wire reset;
+wire [3:0] counter1, counter2,counter3;
+input R_btn,G_btn,B_btn;
 
+clk_div c(clk,sclk);
+univ_counter c1(sclk,reset,B_btn,counter1);
+univ_counter c2(sclk,reset,G_btn,counter2);
+univ_counter c3(sclk,reset,R_btn,counter3);
+
+     
 reg [4:0] PWM1,PWM2,PWM3;
 
+
+
 // Next State Logic
-always @(posedge clk) PWM1 <= PWM1[3:0] + PWM_input1;
-always @(posedge clk) PWM2 <= PWM2[3:0] + PWM_input2;
-always @(posedge clk) PWM3 <= PWM3[3:0] + PWM_input3;
+always @(negedge clk)
+begin
+ PWM1 <= PWM1[3:0] + counter1;
+ PWM2 <= PWM2[3:0] + counter2;
+ PWM3 <= PWM3[3:0] + counter3;
+end
 
 //Output
 assign LED[0] = PWM1[4];
